@@ -13,13 +13,26 @@ import java.util.UUID;
  * entities' schema.
  */
 public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String> {
+    /**
+     * Physical location of the repository.
+     */
     private static final String VEHICLE_HOME = "vehicle.csv";
+
+    /**
+     * Singleton instance.
+     */
     private static final VehicleRepository singleton = new VehicleRepository();
 
+    /**
+     * Constructs a Vehicle repository.
+     */
     private VehicleRepository() {
         super(VEHICLE_HOME, Schema.class);
     }
 
+    /**
+     * @return the unique instance.
+     */
     public static VehicleRepository getInstance() {
         return singleton;
     }
@@ -59,6 +72,9 @@ public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String
         return result;
     }
 
+    /**
+     * Vehicle schema (columns).
+     */
     public enum Schema {
         ID, TYPE, MODEL, ZONE, DESCRIPTION, DRIVER_ID
     }

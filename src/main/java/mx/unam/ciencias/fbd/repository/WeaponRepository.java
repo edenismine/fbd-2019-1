@@ -8,14 +8,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Weapon repository.
+ */
 public class WeaponRepository extends AbstractCSVCrudRepository<Weapon, UUID> {
+    /**
+     * Physical location of the repository.
+     */
     private static final String WEAPON_HOME = "weapon.csv";
+    /**
+     * Singleton instance.
+     */
     private static final WeaponRepository singleton = new WeaponRepository();
 
+    /**
+     * Constructs a weapon repository.
+     */
     private WeaponRepository() {
         super(WEAPON_HOME, Schema.class);
     }
 
+    /**
+     * @return the unique instance.
+     */
     public static WeaponRepository getInstance() {
         return singleton;
     }
@@ -46,6 +61,9 @@ public class WeaponRepository extends AbstractCSVCrudRepository<Weapon, UUID> {
         return result;
     }
 
+    /**
+     * Weapon schema (columns).
+     */
     public enum Schema {
         ID, TYPE, DESCRIPTION, USER_ID
     }

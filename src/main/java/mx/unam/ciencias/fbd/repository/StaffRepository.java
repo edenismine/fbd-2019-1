@@ -14,13 +14,26 @@ import java.util.UUID;
  * entities' schema.
  */
 public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
+    /**
+     * Physical location of the repository.
+     */
     private static final String STAFF_HOME = "staff.csv";
+
+    /**
+     * Singleton instance.
+     */
     private static final StaffRepository singleton = new StaffRepository();
 
+    /**
+     * Constructs a Staff repository.
+     */
     private StaffRepository() {
         super(STAFF_HOME, Schema.class);
     }
 
+    /**
+     * @return the unique instance.
+     */
     public static StaffRepository getInstance() {
         return singleton;
     }
