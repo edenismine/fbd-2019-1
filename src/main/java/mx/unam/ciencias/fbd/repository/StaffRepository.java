@@ -4,13 +4,38 @@ import mx.unam.ciencias.fbd.domain.Staff;
 import org.apache.commons.csv.CSVRecord;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
+/**
+ * Concrete Staff entities repository. Provides transformer functions from and to CSVRecords. It also set's the
+ * entities' schema.
+ */
 public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
     private static final String STAFF_HOME = "staff.csv";
+    private static final String[] SCHEMA = {"ID", "NAME", "SEX", "DOB", "DOH", "ROLE", "SUPERVISOR_ID"};
 
     public StaffRepository() {
         super(STAFF_HOME);
+    }
+
+    @Override
+    List<String> asRecord(Staff entity) {
+        String supervisor = entity.getSupervisorID() == null ? "" : entity.getSupervisorID().toString();
+        return Arrays.asList(
+                entity.getId().toString(),
+                entity.getName(),
+                entity.getSex().toString(),
+                entity.getDob().toString(),
+                entity.getDoh().toString(),
+                entity.getRole().toString(),
+                supervisor);
+    }
+
+    @Override
+    UUID getId(Staff entity) {
+        return entity.getId();
     }
 
     @Override
@@ -33,6 +58,6 @@ public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
 
     @Override
     protected String[] getSchema() {
-        return Staff.getSCHEMA();
+        return SCHEMA;
     }
 }

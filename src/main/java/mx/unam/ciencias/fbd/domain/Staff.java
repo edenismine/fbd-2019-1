@@ -1,7 +1,6 @@
 package mx.unam.ciencias.fbd.domain;
 
 import mx.unam.ciencias.fbd.util.Validate;
-import org.apache.commons.csv.CSVRecord;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,11 +9,7 @@ import java.util.UUID;
 /**
  * Elemento de la SSP.
  */
-public class Staff implements CSVEntity<Staff> {
-    /**
-     * This entity's fields.
-     */
-    private static final String[] SCHEMA = {"ID", "NAME", "SEX", "DOB", "DOH", "ROLE", "SUPERVISOR_ID"};
+public class Staff {
     /**
      * Matrícula del elemento.
      */
@@ -64,11 +59,17 @@ public class Staff implements CSVEntity<Staff> {
         this.role = role;
     }
 
-    /**
-     * @return the schema of this entity.
-     */
-    public static String[] getSCHEMA() {
-        return SCHEMA.clone();
+    @Override
+    public String toString() {
+        return "Staff{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sex=" + sex +
+                ", dob=" + dob +
+                ", doh=" + doh +
+                ", role=" + role +
+                ", supervisorID=" + supervisorID +
+                '}';
     }
 
     /**
@@ -106,7 +107,6 @@ public class Staff implements CSVEntity<Staff> {
      * @param supervisorID el nuevo valor. No debe ser null.
      */
     public void setSupervisorID(UUID supervisorID) {
-        Validate.notNull(supervisorID);
         this.supervisorID = supervisorID;
     }
 
@@ -210,22 +210,6 @@ public class Staff implements CSVEntity<Staff> {
     public void setRole(Role role) {
         Validate.notNull(role);
         this.role = role;
-    }
-
-    @Override
-    public String[] schema() {
-        return SCHEMA.clone();
-    }
-
-    @Override
-    public String[] asRecord() {
-        String supervisor = this.supervisorID == null ? "" : this.supervisorID.toString();
-        return new String[]{id.toString(), name, sex.toString(), dob.toString(), doh.toString(), role.toString(), supervisor};
-    }
-
-    @Override
-    public Staff asObject(CSVRecord record) {
-        return null;
     }
 
     /**

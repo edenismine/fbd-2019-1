@@ -1,6 +1,5 @@
 package mx.unam.ciencias.fbd.repository;
 
-import mx.unam.ciencias.fbd.domain.CSVEntity;
 import mx.unam.ciencias.fbd.util.Validate;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +15,14 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> implements CrudRepository<S, ID> {
+/**
+ * Abstract CSV CRUD repository, implements all the basic crud functions. Implementors must provide entity schema and
+ * object transformation.
+ *
+ * @param <S>  The type of the resources served by this repository.
+ * @param <ID> The type of the identifier of the server resources.
+ */
+public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository<S, ID> {
     /**
      * Logger.
      */
@@ -47,7 +53,7 @@ public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> impleme
         Collection<CSVRecord> records = readRecords();
 
         // look for record with matching id and if found, delete it.
-        boolean needOverwrite = records.removeIf(record -> entity.getId().toString().equals(record.get("ID")));
+        boolean needOverwrite = records.removeIf(record -> getId(entity).toString().equals(record.get("ID")));
 
         // if overwrite is needed recreate the file.
         recreateFileIfNeeded(needOverwrite);
@@ -62,7 +68,7 @@ public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> impleme
         }
 
         // save the entity
-        out.printRecord((Object[]) entity.asRecord());
+        out.printRecord(asRecord(entity));
 
         // close the file
         out.close();
@@ -130,8 +136,13 @@ public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> impleme
     private Collection<CSVRecord> readRecords() throws IOException {
         InputStream in = REPO_HOME.openStream();
         List<CSVRecord> result =
-                CSVParser.parse(in, Charset.defaultCharset(),
-                        CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim()).getRecords();
+                CSVParser.parse(
+                        in,
+                        Charset.defaultCharset(),
+                        CSVFormat.DEFAULT.withFirstRecordAsHeader()
+                                .withIgnoreHeaderCase()
+                                .withTrim()
+                ).getRecords();
         in.close();
         return result;
     }
@@ -146,7 +157,7 @@ public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> impleme
         if (needOverwrite) {
             File data = new File(REPO_HOME.getFile());
             if (data.delete() && data.createNewFile()) {
-                LOGGER.info("File " + REPO_HOME + " was recreated.");
+                LOGGER.severe("File " + REPO_HOME + " was recreated.");
             } else {
                 String msg = "File " + REPO_HOME + "was not recreated.";
                 LOGGER.severe(msg);
@@ -154,6 +165,22 @@ public abstract class AbstractCSVCrudRepository<S extends CSVEntity, ID> impleme
             }
         }
     }
+
+    /**
+     * Retrieves a list of the entity's attributes as strings.
+     *
+     * @param entity the entity.
+     * @return the list of the entity's attributes as strings.
+     */
+    abstract List<String> asRecord(S entity);
+
+    /**
+     * Retrieves the id of the provided entity.
+     *
+     * @param entity the entity.
+     * @return the id of the provided entity.
+     */
+    abstract ID getId(S entity);
 
     /**
      * Generates an entity object from a csv record.
