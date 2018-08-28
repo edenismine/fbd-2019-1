@@ -15,9 +15,14 @@ import java.util.UUID;
  */
 public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
     private static final String STAFF_HOME = "staff.csv";
+    private static final StaffRepository singleton = new StaffRepository();
 
-    public StaffRepository() {
+    private StaffRepository() {
         super(STAFF_HOME, Schema.class);
+    }
+
+    public static StaffRepository getInstance() {
+        return singleton;
     }
 
     @Override

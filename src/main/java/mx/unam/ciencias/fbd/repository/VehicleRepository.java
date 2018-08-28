@@ -14,9 +14,14 @@ import java.util.UUID;
  */
 public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String> {
     private static final String VEHICLE_HOME = "vehicle.csv";
+    private static final VehicleRepository singleton = new VehicleRepository();
 
-    public VehicleRepository() {
+    private VehicleRepository() {
         super(VEHICLE_HOME, Schema.class);
+    }
+
+    public static VehicleRepository getInstance() {
+        return singleton;
     }
 
     @Override

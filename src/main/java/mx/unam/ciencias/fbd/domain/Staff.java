@@ -87,14 +87,6 @@ public class Staff {
     }
 
     /**
-     * @return la lista de subordinados directos del elemento.
-     */
-    public List<Staff> getSubordinates() {
-        // TODO extract to a service
-        return null;
-    }
-
-    /**
      * @return la matrícula del elemento que supervisa a este elemento.
      */
     public UUID getSupervisorID() {

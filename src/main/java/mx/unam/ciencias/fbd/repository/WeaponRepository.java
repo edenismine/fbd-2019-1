@@ -10,9 +10,14 @@ import java.util.UUID;
 
 public class WeaponRepository extends AbstractCSVCrudRepository<Weapon, UUID> {
     private static final String WEAPON_HOME = "weapon.csv";
+    private static final WeaponRepository singleton = new WeaponRepository();
 
-    public WeaponRepository() {
+    private WeaponRepository() {
         super(WEAPON_HOME, Schema.class);
+    }
+
+    public static WeaponRepository getInstance() {
+        return singleton;
     }
 
     @Override
