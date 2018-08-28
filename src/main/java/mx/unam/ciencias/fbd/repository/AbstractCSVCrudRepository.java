@@ -48,85 +48,100 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
     }
 
     @Override
-    public S save(S entity) throws IOException {
+    public S save(S entity) {
         LOGGER.info("Persisting entity: " + entity);
-        Validate.notNull(entity);
-        // read all the records
-        Collection<CSVRecord> records = readRecords();
+        try {
+            Validate.notNull(entity);
+            // read all the records
+            Collection<CSVRecord> records = readRecords();
 
-        // look for record with matching id and if found, delete it.
-        boolean needOverwrite = records.removeIf(record -> getId(entity).toString().equals(record.get("ID")));
+            // look for record with matching id and if found, delete it.
+            boolean needOverwrite = records.removeIf(record -> getId(entity).toString().equals(record.get("ID")));
 
-        // if overwrite is needed recreate the file.
-        recreateFileIfNeeded(needOverwrite);
+            // if overwrite is needed recreate the file.
+            recreateFileIfNeeded(needOverwrite);
 
-        // Create buffered writer
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(REPO_HOME.getFile())));
-        CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
+            // Create buffered writer
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(REPO_HOME.getFile())));
+            CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
 
-        // if file was recreated, add all the records
-        if (needOverwrite) {
-            out.printRecords(records);
+            // if file was recreated, add all the records
+            if (needOverwrite) {
+                out.printRecords(records);
+            }
+
+            // save the entity
+            out.printRecord(asRecord(entity));
+
+            // close the file
+            out.close();
+
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
-
-        // save the entity
-        out.printRecord(asRecord(entity));
-
-        // close the file
-        out.close();
-
         // return the persisted entity
         return entity;
     }
 
     @Override
-    public Optional<S> findById(ID id) throws IOException {
+    public Optional<S> findById(ID id) {
         Validate.notNull(id);
-        // read the file
-        Collection<CSVRecord> records = readRecords();
-
-        // look for record with matching id and if found, fetch it.
         CSVRecord target = null;
-        for (CSVRecord record : records) {
-            if (id.toString().equals(record.get("ID"))) {
-                target = record;
-                break;
+        try {
+            // read the file
+            Collection<CSVRecord> records = readRecords();
+            // look for record with matching id and if found, fetch it.
+            for (CSVRecord record : records) {
+                if (id.toString().equals(record.get("ID"))) {
+                    target = record;
+                    break;
+                }
             }
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
+
         S result = ofRecord(target);
         return Optional.ofNullable(result);
     }
 
     @Override
-    public Stream<S> findAll() throws IOException {
+    public Stream<S> findAll() {
         // read the file
-        Collection<CSVRecord> records = readRecords();
+        Collection<CSVRecord> records = null;
+        try {
+            records = readRecords();
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+        }
         // map the records to entities
-        return records.stream().map(this::ofRecord);
+        return records == null ? Stream.empty() : records.stream().map(this::ofRecord);
     }
 
     @Override
-    public boolean deleteById(ID id) throws IOException {
+    public boolean deleteById(ID id) {
         // read the file
-        Collection<CSVRecord> records = readRecords();
-
-        // look for record with matching id and if found, delete it.
-        boolean needOverwrite = records.removeIf(record -> id.toString().equals(record.get("ID")));
-
-        // if overwrite is needed recreate the file.
-        recreateFileIfNeeded(needOverwrite);
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(REPO_HOME.getFile()));
-        CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
-
-        // if file was recreated, add all the records
-        if (needOverwrite) {
-            out.printRecords(records);
+        Collection<CSVRecord> records;
+        boolean modified = false;
+        try {
+            records = readRecords();
+            // look for record with matching id and if found, delete it.
+            modified = records.removeIf(record -> id.toString().equals(record.get("ID")));
+            // if overwrite is needed recreate the file.
+            recreateFileIfNeeded(modified);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(REPO_HOME.getFile()));
+            CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
+            // if file was recreated, add all the records
+            if (modified) {
+                out.printRecords(records);
+            }
+            // close the file
+            out.close();
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
-        // close the file
-        out.close();
         // return modified state
-        return needOverwrite;
+        return modified;
     }
 
     /**

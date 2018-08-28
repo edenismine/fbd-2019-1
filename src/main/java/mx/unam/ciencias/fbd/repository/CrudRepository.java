@@ -1,6 +1,5 @@
 package mx.unam.ciencias.fbd.repository;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -10,9 +9,8 @@ public interface CrudRepository<T, ID> {
      *
      * @param entity the entity that will be persisted, must not be null.
      * @return the saved entity.
-     * @throws IOException if something goes wrong when reading or writing the persisted data.
      */
-    T save(T entity) throws IOException;
+    T save(T entity);
 
     /**
      * Retrieves an entity from the repository using its id.
@@ -20,17 +18,17 @@ public interface CrudRepository<T, ID> {
      * @param id the entity's id, must not be null.
      * @return the entity with a matching id or {@link Optional#empty()} if no such entity exists.
      */
-    Optional<T> findById(ID id) throws IOException;
+    Optional<T> findById(ID id);
 
     /**
      * @return all the persisted entities.
      */
-    Stream<T> findAll() throws IOException;
+    Stream<T> findAll();
 
     /**
      * Deletes an entity from the repository using its id.
      *
      * @param id the entity's id, must not be null.
      */
-    boolean deleteById(ID id) throws IOException;
+    boolean deleteById(ID id);
 }
