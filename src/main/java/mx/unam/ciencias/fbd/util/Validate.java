@@ -1,5 +1,8 @@
 package mx.unam.ciencias.fbd.util;
 
+/**
+ * Utility class, provides several validation methods.
+ */
 public class Validate {
     /**
      * Checks that all provided objects are not null.

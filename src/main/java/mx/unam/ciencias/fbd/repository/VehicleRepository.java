@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Concrete Staff entities repository. Provides transformer functions from and to CSVRecords. It also sets the
+ * Concrete Vehicle entities repository. Provides transformer functions from and to CSVRecords. It also sets the
  * entities' schema.
  */
 public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String> {
