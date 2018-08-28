@@ -1,50 +1,38 @@
 package mx.unam.ciencias.fbd.repository;
 
 import mx.unam.ciencias.fbd.domain.Staff;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
 import java.util.UUID;
 
-public class StaffRepository implements CrudRepository<Staff, UUID> {
+public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
     private static final String STAFF_HOME = "staff.csv";
 
-    @Override
-    public Staff save(Staff entity) throws IOException {
-        // read the file
-        File data = new File(STAFF_HOME);
-        Collection<CSVRecord> records = CSVParser.parse(data, Charset.defaultCharset(), CSVFormat.DEFAULT).getRecords();
-        // look for record with matching id
-        // if record is found, set flag to true
-        records.removeIf(record -> entity.getId().toString().equals(record.get("ID")));
-
-        // open the file
-        BufferedWriter writer = new BufferedWriter(new FileWriter(data));
-        CSVPrinter out = new CSVPrinter(writer, CSVFormat.DEFAULT);
-        // close the file
-        // return the persisted entity
-        return entity;
+    public StaffRepository() {
+        super(STAFF_HOME);
     }
 
     @Override
-    public Optional<Staff> findById(UUID uuid) {
-        return Optional.empty();
+    public Staff ofRecord(CSVRecord record) {
+        UUID id = UUID.fromString(record.get("ID"));
+        String name = record.get("NAME");
+        Staff.Sex sex = Staff.Sex.valueOf(record.get("SEX"));
+        LocalDate dob = LocalDate.parse(record.get("DOB"));
+        LocalDate doh = LocalDate.parse(record.get("DOH"));
+        Staff.Role role = Staff.Role.valueOf(record.get("ROLE"));
+        String supervisorIdStr = record.get("SUPERVISOR_ID");
+        Staff result = new Staff(name, sex, dob, doh, role);
+        result.setId(id);
+        if (!supervisorIdStr.isEmpty()) {
+            UUID supervisorId = UUID.fromString(supervisorIdStr);
+            result.setSupervisorID(supervisorId);
+        }
+        return result;
     }
 
     @Override
-    public List<Staff> findAll() {
-        return null;
-    }
-
-    @Override
-    public void deleteById(UUID uuid) {
-
+    protected String[] getSchema() {
+        return Staff.getSCHEMA();
     }
 }

@@ -1,5 +1,8 @@
 package mx.unam.ciencias.fbd.domain;
 
+import mx.unam.ciencias.fbd.util.Validate;
+import org.apache.commons.csv.CSVRecord;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -7,11 +10,15 @@ import java.util.UUID;
 /**
  * Elemento de la SSP.
  */
-public class Staff {
+public class Staff implements CSVEntity<Staff> {
+    /**
+     * This entity's fields.
+     */
+    private static final String[] SCHEMA = {"ID", "NAME", "SEX", "DOB", "DOH", "ROLE", "SUPERVISOR_ID"};
     /**
      * Matrícula del elemento.
      */
-    private final UUID id;
+    private UUID id;
     /**
      * Nombre del elemento.
      */
@@ -35,10 +42,10 @@ public class Staff {
     /**
      * Supervisor del elemento.
      */
-    private Staff supervisor;
+    private UUID supervisorID;
 
     /**
-     * Construye un nuevo elemento.
+     * Construye un nuevo elemento. Ningún valor debe ser nulo.
      *
      * @param name el nombre del elemento.
      * @param sex  el sexo del elemento.
@@ -47,12 +54,21 @@ public class Staff {
      * @param role el puesto del elemento.
      */
     public Staff(String name, Sex sex, LocalDate dob, LocalDate doh, Role role) {
+        Validate.notEmpty(name);
+        Validate.notNull(sex, dob, doh, role);
         this.id = UUID.randomUUID();
         this.name = name;
         this.sex = sex;
         this.dob = dob;
         this.doh = doh;
         this.role = role;
+    }
+
+    /**
+     * @return the schema of this entity.
+     */
+    public static String[] getSCHEMA() {
+        return SCHEMA.clone();
     }
 
     /**
@@ -78,10 +94,37 @@ public class Staff {
     }
 
     /**
+     * @return la matrícula del elemento que supervisa a este elemento.
+     */
+    public UUID getSupervisorID() {
+        return supervisorID;
+    }
+
+    /**
+     * Cambia la matrícula del elemento que supervisa a este elemento.
+     *
+     * @param supervisorID el nuevo valor. No debe ser null.
+     */
+    public void setSupervisorID(UUID supervisorID) {
+        Validate.notNull(supervisorID);
+        this.supervisorID = supervisorID;
+    }
+
+    /**
      * @return la matrícula del elemento.
      */
     public UUID getId() {
         return id;
+    }
+
+    /**
+     * Cambia la matrícula del elemento.
+     *
+     * @param id el nuevo valor. No debe ser null.
+     */
+    public void setId(UUID id) {
+        Validate.notNull(id);
+        this.id = id;
     }
 
     /**
@@ -91,14 +134,13 @@ public class Staff {
         return name;
     }
 
-    /* ACCESS AND MODIFICATION METHODS */
-
     /**
      * Cambia el nombre del elemento al valor proporcionado.
      *
-     * @param name el nuevo valor.
+     * @param name el nuevo valor. No debe ser null ni vacío.
      */
     public void setName(String name) {
+        Validate.notEmpty(name);
         this.name = name;
     }
 
@@ -112,9 +154,10 @@ public class Staff {
     /**
      * Cambia el sexo del elemento al valor proporcionado.
      *
-     * @param sex el nuevo valor.
+     * @param sex el nuevo valor. No debe ser null.
      */
     public void setSex(Sex sex) {
+        Validate.notNull(sex);
         this.sex = sex;
     }
 
@@ -128,9 +171,10 @@ public class Staff {
     /**
      * Cambia la fecha de nacimiento del elemento al valor proporcionado.
      *
-     * @param dob el nuevo valor.
+     * @param dob el nuevo valor. No debe ser null.
      */
     public void setDob(LocalDate dob) {
+        Validate.notNull(dob);
         this.dob = dob;
     }
 
@@ -144,9 +188,10 @@ public class Staff {
     /**
      * Cambia la fecha de contratación del elemento al valor proporcionado.
      *
-     * @param doh el nuevo valor.
+     * @param doh el nuevo valor. No debe ser null.
      */
     public void setDoh(LocalDate doh) {
+        Validate.notNull(doh);
         this.doh = doh;
     }
 
@@ -160,10 +205,27 @@ public class Staff {
     /**
      * Cambia el puesto del elemento al valor proporcionado.
      *
-     * @param role el nuevo valor.
+     * @param role el nuevo valor. No debe ser null.
      */
     public void setRole(Role role) {
+        Validate.notNull(role);
         this.role = role;
+    }
+
+    @Override
+    public String[] schema() {
+        return SCHEMA.clone();
+    }
+
+    @Override
+    public String[] asRecord() {
+        String supervisor = this.supervisorID == null ? "" : this.supervisorID.toString();
+        return new String[]{id.toString(), name, sex.toString(), dob.toString(), doh.toString(), role.toString(), supervisor};
+    }
+
+    @Override
+    public Staff asObject(CSVRecord record) {
+        return null;
     }
 
     /**
@@ -179,7 +241,7 @@ public class Staff {
      */
     public enum Role {
         POLICEMAN,
-        OFFICE,
+        OFFICER,
         LIUTENANT
     }
 }
