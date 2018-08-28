@@ -6,10 +6,6 @@ import java.util.UUID;
 
 public class Vehicle {
     /**
-     * This entity's fields.
-     */
-    private static final String[] SCHEMA = {"ID", "TYPE", "MODEL", "ZONE", "DESCRIPTION", "DRIVER_ID"};
-    /**
      * Las placas del vehículo
      */
     private String id;
@@ -34,13 +30,13 @@ public class Vehicle {
      */
     private UUID driverId;
 
-    public Vehicle(Type type, String model, String description, UUID driverId) {
+    public Vehicle(String id, Type type, String model, String description) {
         Validate.notNull(type, driverId);
-        Validate.notEmpty(model, description);
+        Validate.notEmpty(id, model, description);
+        this.id = id;
         this.type = type;
         this.model = model;
         this.description = description;
-        this.driverId = driverId;
     }
 
     public Type getType() {
@@ -87,15 +83,8 @@ public class Vehicle {
         this.driverId = driverId;
     }
 
-    public String[] asRecord() {
-        String zone = this.zone == null ? "" : this.zone;
-        String driverId = this.driverId == null ? "" : this.driverId.toString();
-        return new String[]{
-                this.id, this.type.toString(), this.model, zone, this.description, driverId};
-    }
-
     public String getId() {
-        return null;
+        return id;
     }
 
     public void setId(String id) {

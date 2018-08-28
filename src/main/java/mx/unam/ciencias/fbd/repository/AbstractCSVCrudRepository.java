@@ -41,9 +41,9 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
      *
      * @param path path to repo's physical location.
      */
-    AbstractCSVCrudRepository(String path) {
+    AbstractCSVCrudRepository(String path, Class<? extends Enum<?>> SCHEMA) {
         this.REPO_HOME = AbstractCSVCrudRepository.class.getClassLoader().getResource(path);
-        this.CSV_FORMAT = CSVFormat.DEFAULT.withHeader(getSchema());
+        this.CSV_FORMAT = CSVFormat.DEFAULT.withHeader(SCHEMA);
     }
 
     @Override
@@ -139,7 +139,8 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
                 CSVParser.parse(
                         in,
                         Charset.defaultCharset(),
-                        CSVFormat.DEFAULT.withFirstRecordAsHeader()
+                        CSVFormat.DEFAULT
+                                .withFirstRecordAsHeader()
                                 .withIgnoreHeaderCase()
                                 .withTrim()
                 ).getRecords();
@@ -189,9 +190,4 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
      * @return the entity.
      */
     public abstract S ofRecord(CSVRecord record);
-
-    /**
-     * @return the entity's schema.
-     */
-    protected abstract String[] getSchema();
 }
