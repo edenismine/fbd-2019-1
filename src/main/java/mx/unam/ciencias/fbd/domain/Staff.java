@@ -90,7 +90,7 @@ public class Staff {
      * @return la lista de subordinados directos del elemento.
      */
     public List<Staff> getSubordinates() {
-        // TODO
+        // TODO extract to a service
         return null;
     }
 

@@ -39,15 +39,17 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
     /**
      * Initializes repo.
      *
-     * @param path path to repo's physical location.
+     * @param path   path to repo's physical location.
+     * @param schema an enum with the entity's schema.
      */
-    AbstractCSVCrudRepository(String path, Class<? extends Enum<?>> SCHEMA) {
+    AbstractCSVCrudRepository(String path, Class<? extends Enum<?>> schema) {
         this.REPO_HOME = AbstractCSVCrudRepository.class.getClassLoader().getResource(path);
-        this.CSV_FORMAT = CSVFormat.DEFAULT.withHeader(SCHEMA);
+        this.CSV_FORMAT = CSVFormat.DEFAULT.withHeader(schema);
     }
 
     @Override
     public S save(S entity) throws IOException {
+        LOGGER.info("Persisting entity: " + entity);
         Validate.notNull(entity);
         // read all the records
         Collection<CSVRecord> records = readRecords();

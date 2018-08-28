@@ -4,6 +4,9 @@ import mx.unam.ciencias.fbd.util.Validate;
 
 import java.util.UUID;
 
+/**
+ * Vehículo de la SSP.
+ */
 public class Vehicle {
     /**
      * Las placas del vehículo
@@ -30,6 +33,14 @@ public class Vehicle {
      */
     private UUID driverId;
 
+    /**
+     * Crea un nuevo vehículo con las caracterísitcas dadas, ninguno de los parámetros debe ser null.
+     *
+     * @param id          la matrícula del vehículo.
+     * @param type        el tipo de vehículo.
+     * @param model       el modelo del vehículo.
+     * @param description la descripción del vehículo.
+     */
     public Vehicle(String id, Type type, String model, String description) {
         Validate.notNull(type, driverId);
         Validate.notEmpty(id, model, description);
@@ -39,6 +50,9 @@ public class Vehicle {
         this.description = description;
     }
 
+    /**
+     * @return el tipo de vehículo.
+     */
     public Type getType() {
         return type;
     }
@@ -48,6 +62,9 @@ public class Vehicle {
         this.type = type;
     }
 
+    /**
+     * @return el modelo del vehículo.
+     */
     public String getModel() {
         return model;
     }
@@ -57,36 +74,68 @@ public class Vehicle {
         this.model = model;
     }
 
+    /**
+     * @return la zona del vehículo.
+     */
     public String getZone() {
         return zone;
     }
 
+    /**
+     * Cambia la zona del vehículo a un nuevo valor.
+     *
+     * @param zone el nuevo valor, no debe ser null.
+     */
     public void setZone(String zone) {
         this.zone = zone;
     }
 
+    /**
+     * @return la descripción del vehículo.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Cambia la descripción del vehículo a un nuevo valor.
+     *
+     * @param description el nuevo valor, no debe ser null.
+     */
     public void setDescription(String description) {
         Validate.notEmpty(description);
         this.description = description;
     }
 
+    /**
+     * @return el identificador de la persona que maneja el vehículo.
+     */
     public UUID getDriverId() {
         return driverId;
     }
 
+    /**
+     * Cambia el identificador de la persona que maneja el vehículo a un nuevo valor.
+     *
+     * @param driverId el nuevo valor, no debe ser null.
+     */
     public void setDriverId(UUID driverId) {
         Validate.notNull(driverId);
         this.driverId = driverId;
     }
 
+    /**
+     * @return el identificador del vehículo.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Cambia el identificador del vehículo a un nuevo valor.
+     *
+     * @param id el nuevo valor, no debe ser null.
+     */
     public void setId(String id) {
         this.id = id;
     }
