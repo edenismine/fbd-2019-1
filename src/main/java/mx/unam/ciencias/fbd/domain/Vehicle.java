@@ -42,7 +42,7 @@ public class Vehicle {
      * @param description la descripción del vehículo.
      */
     public Vehicle(String id, Type type, String model, String description) {
-        Validate.notNull(type, driverId);
+        Validate.notNull(type);
         Validate.notEmpty(id, model, description);
         this.id = id;
         this.type = type;

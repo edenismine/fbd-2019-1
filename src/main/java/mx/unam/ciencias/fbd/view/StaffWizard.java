@@ -18,9 +18,12 @@ public class StaffWizard implements Wizard<Staff> {
 
     @Override
     public Optional<Staff> edit(Staff entity) {
+        // Obtain entity schema and create regex
         String staffSchemaRegex =
                 Arrays.stream(StaffRepository.Schema.values()).map(Enum::toString).collect(Collectors.joining("|"));
+        // Create edit panel
         Panel editor = new Panel("STAFF:EDIT", scanner, staffSchemaRegex);
+        // Create help information
         editor.setHelp(() -> {
             System.out.println("\nUso:");
             System.out.println("\t" + StaffRepository.Schema.NAME);
@@ -38,6 +41,7 @@ public class StaffWizard implements Wizard<Staff> {
             System.out.println("\t" + Panel.EOE);
             System.out.println("\t  Regresa al menú anterior.\n");
         });
+        // Handle commands
         editor.setHandler(command -> {
             if (!command.equals(Panel.EOE)) {
                 StaffRepository.Schema routine = StaffRepository.Schema.valueOf(command);
@@ -70,12 +74,16 @@ public class StaffWizard implements Wizard<Staff> {
                         } else {
                             System.out.println("Ningún elemento puede asigarse como superior.");
                         }
+                        break;
                     case ID:
                         System.out.println("Se está editando al elemento " + entity.getId());
+                        break;
                 }
             }
         });
+        // Run editor panel
         editor.run();
+        // return entity
         return Optional.of(entity);
     }
 
@@ -132,6 +140,7 @@ public class StaffWizard implements Wizard<Staff> {
     }
 
     private String getValidName() {
-        return ConsoleUtils.getValidString("[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*", scanner, "Nombre", "INVALID");
+        return ConsoleUtils.getValidString("[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*", scanner,
+                "Nombre", "INVALID");
     }
 }
