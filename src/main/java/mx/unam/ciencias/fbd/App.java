@@ -8,8 +8,7 @@ import mx.unam.ciencias.fbd.service.StaffService;
 import mx.unam.ciencias.fbd.service.VehicleService;
 import mx.unam.ciencias.fbd.service.WeaponService;
 import mx.unam.ciencias.fbd.util.ConsoleUtils;
-import mx.unam.ciencias.fbd.view.Panel;
-import mx.unam.ciencias.fbd.view.Wizard;
+import mx.unam.ciencias.fbd.view.*;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -97,15 +96,15 @@ public class App {
     /**
      * Staff editing wizard.
      */
-    private static Wizard STAFF_WIZARD;
+    private static Wizard<Staff> STAFF_WIZARD = new StaffWizard(SCANNER);
     /**
      * Vehicle editing wizard.
      */
-    private static Wizard VEHICLE_WIZARD;
+    private static Wizard<Vehicle> VEHICLE_WIZARD = new VehicleWizard(SCANNER);
     /**
      * Weapon editing wizard.
      */
-    private static Wizard WEAPON_WIZARD;
+    private static Wizard<Weapon> WEAPON_WIZARD = new WeaponWizard(SCANNER);
 
     /**
      * Initializes the app and runs the main panel.
@@ -119,34 +118,10 @@ public class App {
     }
 
     private static void init() {
-        initStaffWizard();
-        initVehicleWizard();
-        initWeaponWizard();
         initStaffPanel();
         initVehiclePanel();
         initWeaponPanel();
         initMainPanel();
-    }
-
-    /**
-     * Correctly initializes the Weapon editing wizard.
-     */
-    private static void initWeaponWizard() {
-
-    }
-
-    /**
-     * Correctly initializes the Vehicle editing wizard.
-     */
-    private static void initVehicleWizard() {
-
-    }
-
-    /**
-     * Correctly initializes the Staff editing wizard.
-     */
-    private static void initStaffWizard() {
-
     }
 
     /**
@@ -190,8 +165,7 @@ public class App {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
                     case NEW:
-                        // TODO implement weapon wizard
-                        System.out.println("Launch weapon wizard");
+                        WEAPON_WIZARD.create().ifPresent(WEAPON_SERVICE::save);
                         break;
                     case LIST:
                         WEAPON_SERVICE.findAll().forEach(System.out::println);
@@ -216,8 +190,7 @@ public class App {
                             System.out.println(weapon);
                             break;
                         case EDIT:
-                            // TODO implement weapon wizard
-                            System.out.println("Launch weapon wizard - edit mode");
+                            WEAPON_WIZARD.edit(weapon).ifPresent(WEAPON_SERVICE::save);
                             break;
                         case DELETE:
                             WEAPON_SERVICE.deleteById(weapon.getId());
@@ -245,8 +218,7 @@ public class App {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
                     case NEW:
-                        // TODO implement vehicle wizard
-                        System.out.println("Launch vehicle wizard");
+                        VEHICLE_WIZARD.create().ifPresent(VEHICLE_SERVICE::save);
                         break;
                     case LIST:
                         VEHICLE_SERVICE.findAll().forEach(System.out::println);
@@ -266,8 +238,7 @@ public class App {
                             System.out.println(vehicle);
                             break;
                         case EDIT:
-                            // TODO implement vehicle wizard
-                            System.out.println("Launch vehicle wizard - edit mode");
+                            VEHICLE_WIZARD.edit(vehicle).ifPresent(VEHICLE_SERVICE::save);
                             break;
                         case DELETE:
                             VEHICLE_SERVICE.deleteById(vehicle.getId());
@@ -295,8 +266,7 @@ public class App {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
                     case NEW:
-                        // TODO implement staff wizard
-                        System.out.println("Launch staff wizard");
+                        STAFF_WIZARD.create().ifPresent(STAFF_SERVICE::save);
                         break;
                     case LIST:
                         STAFF_SERVICE.findAll().forEach(System.out::println);
@@ -321,8 +291,7 @@ public class App {
                             System.out.println(staff);
                             break;
                         case EDIT:
-                            // TODO implement staff wizard
-                            System.out.println("Launch staff wizard - edit mode");
+                            STAFF_WIZARD.edit(staff).ifPresent(STAFF_SERVICE::save);
                             break;
                         case DELETE:
                             STAFF_SERVICE.deleteById(staff.getId());
