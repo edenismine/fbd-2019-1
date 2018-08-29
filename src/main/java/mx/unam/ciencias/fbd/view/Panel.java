@@ -14,7 +14,7 @@ public class Panel {
     /**
      * Command that signals end of execution (EOE).
      */
-    private static final String EOE = "EXIT";
+    static final String EOE = "EXIT";
     /**
      * The panel's title. It precedes all user input.
      */

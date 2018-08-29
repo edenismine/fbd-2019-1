@@ -218,6 +218,6 @@ public class Staff {
     public enum Role {
         POLICEMAN,
         OFFICER,
-        LIUTENANT
+        LIEUTENANT
     }
 }
