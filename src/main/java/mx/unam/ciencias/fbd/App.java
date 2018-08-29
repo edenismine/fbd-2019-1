@@ -4,7 +4,6 @@ import mx.unam.ciencias.fbd.service.StaffService;
 import mx.unam.ciencias.fbd.service.VehicleService;
 import mx.unam.ciencias.fbd.service.WeaponService;
 
-import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -27,10 +26,10 @@ public class App {
     private static final WeaponService weaponService = WeaponService.getInstance();
     private static final Scanner scan = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String tables = Arrays.stream(Table.values()).map(Object::toString).collect(Collectors.joining("|"));
         boolean close = false;
-        String userInput = "";
+        String userInput;
         System.out.println("SSP-CSV-DB @Version alpha0.0.1");
         usage();
         do {
