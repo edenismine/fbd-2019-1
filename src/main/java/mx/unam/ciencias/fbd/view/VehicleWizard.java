@@ -24,9 +24,9 @@ public class VehicleWizard implements Wizard<Vehicle> {
         String description = getValidDescription();
         Vehicle result = new Vehicle(plates, type, model, description);
         result.setZone(getValidZone());
-        String addSupervisor = ConsoleUtils.getValidString("[yY][eE][sS]|[nN][oO]|[sS][iI]", scanner,
+        String addDriver = ConsoleUtils.getValidString("[yY][eE][sS]|[nN][oO]|[sS][iI]", scanner,
                 "Agregar conductor?", "Por favor usa el formato si|no");
-        if (addSupervisor.toLowerCase().charAt(0) != 'n') {
+        if (addDriver.toLowerCase().charAt(0) != 'n') {
             Optional<UUID> driverId = getValidDriverID();
             if (driverId.isPresent()) {
                 result.setDriverId(driverId.get());
