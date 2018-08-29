@@ -61,7 +61,7 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
     @Override
     public S save(S entity) {
         Validate.notNull(entity);
-        LOGGER.info("Persisting entity: " + entity);
+        LOGGER.fine("Persisting entity: " + entity);
         S result = entity;
         // delete record if it exists
         try {

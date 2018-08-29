@@ -35,7 +35,7 @@ public class WeaponWizard implements Wizard<Weapon> {
         String vehicleSchemaRegex =
                 Arrays.stream(WeaponRepository.Schema.values()).map(Enum::toString).collect(Collectors.joining("|"));
         // Create edit panel
-        Panel editor = new Panel("VEHICLE:EDIT", scanner, vehicleSchemaRegex);
+        Panel editor = new Panel("WEAPON:EDIT", scanner, vehicleSchemaRegex);
         // Create help information
         editor.setHelp(() -> {
             System.out.println("\nUso:");
@@ -101,7 +101,7 @@ public class WeaponWizard implements Wizard<Weapon> {
             System.out.println("Selecciona el ID del responsable de la siguiente lista usando el índice:");
             for (int i = 0; i < drivers.size(); i++)
                 System.out.println(String.format("%d\t%s", i, drivers.get(i)));
-            int validIndex = ConsoleUtils.getValidInt(scanner, "Conductor",
+            int validIndex = ConsoleUtils.getValidInt(scanner, "Usuario",
                     integer -> integer >= 0 && integer < drivers.size());
             result = drivers.get(validIndex);
         }

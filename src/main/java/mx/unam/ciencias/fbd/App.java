@@ -13,6 +13,8 @@ import mx.unam.ciencias.fbd.view.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 
@@ -112,6 +114,8 @@ public class App {
      * @param args console arguments.
      */
     public static void main(String[] args) {
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        logger.setLevel(Level.SEVERE);
         System.out.println(APP_NAME + " @Version alpha0.0.1");
         init();
         MAIN_PANEL.run();
