@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/fbda_practica02.iml" filepath="$PROJECT_DIR$/fbda_practica02.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/fbda_practica02_main.iml" filepath="$PROJECT_DIR$/.idea/modules/fbda_practica02_main.iml" group="fbda_practica02" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fbda_practica02_test.iml" filepath="$PROJECT_DIR$/.idea/modules/fbda_practica02_test.iml" group="fbda_practica02" />
     </modules>
   </component>
 </project>
