@@ -332,10 +332,16 @@ public class App {
         });
     }
 
+    /**
+     * Prints the usage section header.
+     */
     private static void usage() {
         System.out.println("\nUso:");
     }
 
+    /**
+     * Prints helpful information about basic options.
+     */
     private static void basicOperationsUsage() {
         System.out.println(String.format("\t" + BasicOperation.USE + " (%s)", TABLES));
         System.out.println("\t  Selecciona la tabla para trabajar sobre ella.");
@@ -343,6 +349,9 @@ public class App {
         System.out.println("\t  Termina la ejecución del programa.\n");
     }
 
+    /**
+     * Prints helpful information about crud options.
+     */
     private static void crudUsage() {
         System.out.println("\t" + TableOperation.LIST);
         System.out.println("\t  Lista todas las entidades de la tabla.");
@@ -358,6 +367,9 @@ public class App {
         System.out.println("\t  Regresa al menú anterior.\n");
     }
 
+    /**
+     * Prints helpful information about the staff options.
+     */
     private static void staffUsage() {
         System.out.println("\t" + StaffOperation.SENIORITY + " \"ID\"");
         System.out.println("\t  Calcula la anitgüedad del elemento con el ID dado.");
