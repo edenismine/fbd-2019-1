@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Weapon repository.
@@ -15,7 +16,7 @@ public class WeaponRepository extends AbstractCSVCrudRepository<Weapon, UUID> {
     /**
      * Physical location of the repository.
      */
-    private static final String WEAPON_HOME = "weapon.csv";
+    private static final String CSV_FILE = "weapon.csv";
     /**
      * Singleton instance.
      */
@@ -25,7 +26,7 @@ public class WeaponRepository extends AbstractCSVCrudRepository<Weapon, UUID> {
      * Constructs a weapon repository.
      */
     private WeaponRepository() {
-        super(WEAPON_HOME, Schema.class);
+        super(CSV_FILE, Schema.class, Logger.getLogger(WeaponRepository.class.getName()));
     }
 
     /**

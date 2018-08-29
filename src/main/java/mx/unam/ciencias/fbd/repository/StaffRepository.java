@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Concrete Staff entities repository. Provides transformer functions from and to CSVRecords. It also set's the
@@ -17,8 +18,7 @@ public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
     /**
      * Physical location of the repository.
      */
-    private static final String STAFF_HOME = "staff.csv";
-
+    private static final String CSV_FILE = "staff.csv";
     /**
      * Singleton instance.
      */
@@ -28,7 +28,7 @@ public class StaffRepository extends AbstractCSVCrudRepository<Staff, UUID> {
      * Constructs a Staff repository.
      */
     private StaffRepository() {
-        super(STAFF_HOME, Schema.class);
+        super(CSV_FILE, Schema.class, Logger.getLogger(StaffRepository.class.getName()));
     }
 
     /**

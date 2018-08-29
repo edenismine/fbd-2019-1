@@ -1,14 +1,21 @@
 package mx.unam.ciencias.fbd.repository;
 
+import mx.unam.ciencias.fbd.App;
+import mx.unam.ciencias.fbd.util.Safe;
 import mx.unam.ciencias.fbd.util.Validate;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -26,83 +33,75 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
     /**
      * Logger.
      */
-    private final static Logger LOGGER = Logger.getLogger(AbstractCSVCrudRepository.class.getName());
+    private final Logger LOGGER;
     /**
      * File where the repository if physically stored.
      */
-    private final URL REPO_HOME;
+    private final Path REPO_HOME;
     /**
      * CSV format.
      */
-    private final CSVFormat CSV_FORMAT;
+    private final CSVFormat CSV_PARSE_FORMAT;
 
     /**
      * Initializes repo.
      *
-     * @param path   path to repo's physical location.
-     * @param schema an enum with the entity's schema.
+     * @param csvFile repo's file name.
+     * @param schema  an enum with the entity's schema.
      */
-    AbstractCSVCrudRepository(String path, Class<? extends Enum<?>> schema) {
-        this.REPO_HOME = AbstractCSVCrudRepository.class.getClassLoader().getResource(path);
-        this.CSV_FORMAT = CSVFormat.DEFAULT.withHeader(schema);
+    AbstractCSVCrudRepository(String csvFile, Class<? extends Enum<?>> schema, Logger logger) {
+        this.LOGGER = logger;
+        this.REPO_HOME = Paths.get(App.ROOT.toString(), csvFile);
+        this.CSV_PARSE_FORMAT = CSVFormat.DEFAULT
+                .withHeader(schema)
+                .withIgnoreHeaderCase()
+                .withTrim();
     }
 
     @Override
     public S save(S entity) {
+        Validate.notNull(entity);
         LOGGER.info("Persisting entity: " + entity);
+        S result = entity;
+        // delete record if it exists
         try {
-            Validate.notNull(entity);
-            // read all the records
             Collection<CSVRecord> records = readRecords();
-
-            // look for record with matching id and if found, delete it.
-            boolean needOverwrite = records.removeIf(record -> getId(entity).toString().equals(record.get("ID")));
-
-            // if overwrite is needed recreate the file.
-            recreateFileIfNeeded(needOverwrite);
-
-            // Create buffered writer
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(REPO_HOME.getFile())));
-            CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
-
-            // if file was recreated, add all the records
-            if (needOverwrite) {
-                out.printRecords(records);
-            }
-
-            // save the entity
-            out.printRecord(asRecord(entity));
-
-            // close the file
-            out.close();
-
+            if (records.removeIf(r -> r.get("ID").equals(Safe.safeToString(getId(entity)))))
+                writeRecords(records);
         } catch (IOException e) {
+            result = null;
             LOGGER.severe(e.getMessage());
         }
-        // return the persisted entity
-        return entity;
+        // append record
+        if (result != null) {
+            try {
+                appendRecord(asRecord(result));
+            } catch (IOException e) {
+                result = null;
+                LOGGER.severe(e.getMessage());
+            }
+        }
+
+        // return the persisted entity or null if failed.
+        return result;
     }
 
     @Override
     public Optional<S> findById(ID id) {
         Validate.notNull(id);
-        CSVRecord target = null;
         try {
             // read the file
-            Collection<CSVRecord> records = readRecords();
+            List<CSVRecord> records = readRecords();
             // look for record with matching id and if found, fetch it.
             for (CSVRecord record : records) {
                 if (id.toString().equals(record.get("ID"))) {
-                    target = record;
-                    break;
+                    return Optional.ofNullable(ofRecord(record));
                 }
             }
         } catch (IOException e) {
             LOGGER.severe(e.getMessage());
         }
-
-        S result = ofRecord(target);
-        return Optional.ofNullable(result);
+        return Optional.empty();
     }
 
     @Override
@@ -120,28 +119,16 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
 
     @Override
     public boolean deleteById(ID id) {
-        // read the file
-        Collection<CSVRecord> records;
-        boolean modified = false;
+        boolean changed = false;
         try {
-            records = readRecords();
-            // look for record with matching id and if found, delete it.
-            modified = records.removeIf(record -> id.toString().equals(record.get("ID")));
-            // if overwrite is needed recreate the file.
-            recreateFileIfNeeded(modified);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(REPO_HOME.getFile()));
-            CSVPrinter out = new CSVPrinter(writer, CSV_FORMAT);
-            // if file was recreated, add all the records
-            if (modified) {
-                out.printRecords(records);
-            }
-            // close the file
-            out.close();
+            Collection<CSVRecord> records = readRecords();
+            changed = records.removeIf(r -> r.get("ID").equals(Safe.safeToString(id)));
+            if (changed)
+                writeRecords(records);
         } catch (IOException e) {
             LOGGER.severe(e.getMessage());
         }
-        // return modified state
-        return modified;
+        return changed;
     }
 
     /**
@@ -150,38 +137,40 @@ public abstract class AbstractCSVCrudRepository<S, ID> implements CrudRepository
      * @return all the records.
      * @throws IOException if file not found or unavailable.
      */
-    private Collection<CSVRecord> readRecords() throws IOException {
-        InputStream in = REPO_HOME.openStream();
-        List<CSVRecord> result =
-                CSVParser.parse(
-                        in,
-                        Charset.defaultCharset(),
-                        CSVFormat.DEFAULT
-                                .withFirstRecordAsHeader()
-                                .withIgnoreHeaderCase()
-                                .withTrim()
-                ).getRecords();
-        in.close();
+    private List<CSVRecord> readRecords() throws IOException {
+        Reader reader = Files.newBufferedReader(REPO_HOME);
+        List<CSVRecord> result = CSVParser.parse(reader, CSV_PARSE_FORMAT).getRecords();
+        reader.close();
         return result;
     }
 
     /**
-     * Recreates the repo file if needed.
+     * Overwrites the repository file with a collection of records.
      *
-     * @param needOverwrite flag that signals if the file should be recreated.
-     * @throws IOException if the file needs to be recreated but we can't.
+     * @param records records to be written to the repository file.
+     * @throws IOException if the file cannot be written.
      */
-    private void recreateFileIfNeeded(boolean needOverwrite) throws IOException {
-        if (needOverwrite) {
-            File data = new File(REPO_HOME.getFile());
-            if (data.delete() && data.createNewFile()) {
-                LOGGER.severe("File " + REPO_HOME + " was recreated.");
-            } else {
-                String msg = "File " + REPO_HOME + "was not recreated.";
-                LOGGER.severe(msg);
-                throw new IOException(msg);
-            }
+    private void writeRecords(Collection<CSVRecord> records) throws IOException {
+        File file = new File(REPO_HOME.toString());
+        if (file.delete() && file.createNewFile()) {
+            Writer writer = Files.newBufferedWriter(REPO_HOME, StandardOpenOption.WRITE);
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT);
+            printer.printRecords(records);
+            writer.close();
         }
+    }
+
+    /**
+     * Appends a record to the repository file.
+     *
+     * @param record a record as a list of strings.
+     * @throws IOException if the file cannot be written.
+     */
+    private void appendRecord(List<String> record) throws IOException {
+        Writer writer = Files.newBufferedWriter(REPO_HOME, StandardOpenOption.APPEND);
+        CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT);
+        printer.printRecord(record);
+        writer.close();
     }
 
     /**

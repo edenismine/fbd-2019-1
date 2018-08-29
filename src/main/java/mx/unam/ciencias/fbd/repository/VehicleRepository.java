@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Concrete Vehicle entities repository. Provides transformer functions from and to CSVRecords. It also sets the
@@ -16,7 +17,7 @@ public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String
     /**
      * Physical location of the repository.
      */
-    private static final String VEHICLE_HOME = "vehicle.csv";
+    private static final String CSV_FILE = "vehicle.csv";
 
     /**
      * Singleton instance.
@@ -27,7 +28,7 @@ public class VehicleRepository extends AbstractCSVCrudRepository<Vehicle, String
      * Constructs a Vehicle repository.
      */
     private VehicleRepository() {
-        super(VEHICLE_HOME, Schema.class);
+        super(CSV_FILE, Schema.class, Logger.getLogger(VehicleRepository.class.getName()));
     }
 
     /**

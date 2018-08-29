@@ -1,9 +1,10 @@
 package mx.unam.ciencias.fbd;
 
 import mx.unam.ciencias.fbd.domain.Staff;
-import mx.unam.ciencias.fbd.repository.StaffRepository;
+import mx.unam.ciencias.fbd.service.StaffService;
 
-import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.logging.Logger;
 
@@ -12,23 +13,29 @@ import java.util.logging.Logger;
  */
 public class App {
     /**
+     * App's root directory.
+     */
+    public final static Path ROOT = FileSystems.getDefault().getPath("data").toAbsolutePath();
+    /**
      * Logger.
      */
     private final static Logger LOGGER = Logger.getLogger(App.class.getName());
 
     public static void main(String[] args) {
-        StaffRepository repo = new StaffRepository();
-        try {
-            System.out.println("Printing all records.");
-            repo.findAll().forEach(r -> System.out.println(r.toString()));
-            System.out.println("Persisting new record.");
-            repo.save(new Staff("Daniel", Staff.Sex.MALE, LocalDate.now(), LocalDate.now(), Staff.Role.LIUTENANT));
-            System.out.println("Persisting new record.");
-            repo.save(new Staff("Julia", Staff.Sex.FEMALE, LocalDate.now(), LocalDate.now(), Staff.Role.OFFICER));
-            System.out.println("Printing all records.");
-            repo.findAll().forEach(s -> System.out.println(s.toString()));
-        } catch (IOException e) {
-            LOGGER.severe(e.getLocalizedMessage());
-        }
+        StaffService staffService = StaffService.getInstance();
+        Staff s1 = new Staff("Daniel", Staff.Sex.MALE, LocalDate.now(), LocalDate.now(), Staff.Role.OFFICER);
+        Staff s2 = new Staff("Andrea", Staff.Sex.MALE, LocalDate.now(), LocalDate.now(), Staff.Role.OFFICER);
+
+        System.out.println("Adding " + s1);
+        staffService.save(s1);
+        staffService.findAll().forEach(System.out::println);
+
+        System.out.println("Adding " + s2);
+        staffService.save(s2);
+        staffService.findAll().forEach(System.out::println);
+
+        System.out.println("Deleted " + s2);
+        staffService.deleteById(s2.getId());
+        staffService.findAll().forEach(System.out::println);
     }
 }

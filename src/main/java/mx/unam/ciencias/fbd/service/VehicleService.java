@@ -10,7 +10,6 @@ public class VehicleService extends AbstractResourceService<Vehicle, String> {
         super(VehicleRepository.getInstance());
     }
 
-
     public static VehicleService getInstance() {
         return singleton;
     }
