@@ -1,5 +1,6 @@
 package mx.unam.ciencias.fbd;
 
+import mx.unam.ciencias.fbd.common.*;
 import mx.unam.ciencias.fbd.domain.Staff;
 import mx.unam.ciencias.fbd.domain.Vehicle;
 import mx.unam.ciencias.fbd.domain.Weapon;
@@ -7,6 +8,8 @@ import mx.unam.ciencias.fbd.service.StaffService;
 import mx.unam.ciencias.fbd.service.VehicleService;
 import mx.unam.ciencias.fbd.service.WeaponService;
 import mx.unam.ciencias.fbd.util.ConsoleUtils;
+import mx.unam.ciencias.fbd.view.Panel;
+import mx.unam.ciencias.fbd.view.Wizard;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -19,6 +22,13 @@ public class App {
      * App's root directory.
      */
     public final static Path ROOT = FileSystems.getDefault().getPath("data").toAbsolutePath();
+    /**
+     * Regex that matches all table names.
+     *
+     * @see Table
+     */
+    public static final String TABLES = Arrays.stream(Table.values())
+            .map(Object::toString).collect(Collectors.joining("|"));
     /**
      * Staff service.
      */
@@ -35,13 +45,6 @@ public class App {
      * Standard in wrapped in a scanner for user input.
      */
     private static final Scanner SCANNER = new Scanner(System.in);
-    /**
-     * Regex that matches all table names.
-     *
-     * @see Table
-     */
-    private static final String TABLES = Arrays.stream(Table.values())
-            .map(Object::toString).collect(Collectors.joining("|"));
     /**
      * Regex that matches all basic commands.
      *
@@ -92,6 +95,19 @@ public class App {
     private static Panel MAIN_PANEL;
 
     /**
+     * Staff editing wizard.
+     */
+    private static Wizard STAFF_WIZARD;
+    /**
+     * Vehicle editing wizard.
+     */
+    private static Wizard VEHICLE_WIZARD;
+    /**
+     * Weapon editing wizard.
+     */
+    private static Wizard WEAPON_WIZARD;
+
+    /**
      * Initializes the app and runs the main panel.
      *
      * @param args console arguments.
@@ -103,19 +119,46 @@ public class App {
     }
 
     private static void init() {
+        initStaffWizard();
+        initVehicleWizard();
+        initWeaponWizard();
         initStaffPanel();
         initVehiclePanel();
         initWeaponPanel();
         initMainPanel();
     }
 
+    /**
+     * Correctly initializes the Weapon editing wizard.
+     */
+    private static void initWeaponWizard() {
+
+    }
+
+    /**
+     * Correctly initializes the Vehicle editing wizard.
+     */
+    private static void initVehicleWizard() {
+
+    }
+
+    /**
+     * Correctly initializes the Staff editing wizard.
+     */
+    private static void initStaffWizard() {
+
+    }
+
+    /**
+     * Correctly initializes the Main panel.
+     */
     private static void initMainPanel() {
-        MAIN_PANEL = new Panel(APP_NAME, BASIC_COMMANDS);
+        MAIN_PANEL = new Panel(APP_NAME, SCANNER, BASIC_COMMANDS);
         MAIN_PANEL.setHelp(() -> {
             usage();
             basicOperationsUsage();
         });
-        MAIN_PANEL.setManager(command -> {
+        MAIN_PANEL.setHandler(command -> {
             String selection = ConsoleUtils.getGroup(BASIC_COMMANDS, command, 1);
             Table table = Table.valueOf(selection);
             switch (table) {
@@ -125,21 +168,24 @@ public class App {
                 case VEHICLE:
                     VEHICLE_PANEL.run();
                     break;
-                default:
+                case WEAPON:
                     WEAPON_PANEL.run();
                     break;
             }
         });
     }
 
+    /**
+     * Correctly initializes the Weapon panel.
+     */
     private static void initWeaponPanel() {
-        WEAPON_PANEL = new Panel("WEAPON", TABLE_COMMANDS, ID_COMMANDS);
+        WEAPON_PANEL = new Panel("WEAPON", SCANNER, TABLE_COMMANDS, ID_COMMANDS);
         WEAPON_PANEL.setHelp(() -> {
             usage();
             crudUsage();
         });
 
-        WEAPON_PANEL.setManager(command -> {
+        WEAPON_PANEL.setHandler(command -> {
             if (command.matches(TABLE_COMMANDS)) {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
@@ -184,14 +230,17 @@ public class App {
         });
     }
 
+    /**
+     * Correctly initializes the Vehicle panel.
+     */
     private static void initVehiclePanel() {
-        VEHICLE_PANEL = new Panel("VEHICLE", TABLE_COMMANDS, ID_COMMANDS);
+        VEHICLE_PANEL = new Panel("VEHICLE", SCANNER, TABLE_COMMANDS, ID_COMMANDS);
         VEHICLE_PANEL.setHelp(() -> {
             usage();
             crudUsage();
         });
 
-        VEHICLE_PANEL.setManager(command -> {
+        VEHICLE_PANEL.setHandler(command -> {
             if (command.matches(TABLE_COMMANDS)) {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
@@ -231,14 +280,17 @@ public class App {
         });
     }
 
+    /**
+     * Correctly initializes the Staff panel.
+     */
     private static void initStaffPanel() {
-        STAFF_PANEL = new Panel("STAFF", TABLE_COMMANDS, ID_COMMANDS, STAFF_COMMANDS);
+        STAFF_PANEL = new Panel("STAFF", SCANNER, TABLE_COMMANDS, ID_COMMANDS, STAFF_COMMANDS);
         STAFF_PANEL.setHelp(() -> {
             usage();
             staffUsage();
             crudUsage();
         });
-        STAFF_PANEL.setManager(command -> {
+        STAFF_PANEL.setHandler(command -> {
             if (command.matches(TABLE_COMMANDS)) {
                 TableOperation tableOperation = TableOperation.valueOf(command.trim());
                 switch (tableOperation) {
@@ -346,120 +398,7 @@ public class App {
         System.out.println("\t  Regresa la lista de subordinados del elemento con el ID dado.");
     }
 
-    private enum BasicOperation implements IRegex {
-        USE(String.format("\\s+(%s)", TABLES)), // USE [Table]
-        EXIT(""); // EXIT
-
-        String argument;
-
-        BasicOperation(String argument) {
-            this.argument = argument;
-        }
-
-        @Override
-        public String regex() {
-            return this.name() + this.argument;
-        }
-    }
-
-    private enum TableOperation implements IRegex {
-        LIST,   // LIST
-        NEW;    // NEW
-
-        @Override
-        public String regex() {
-            return this.name();
-        }
-    }
-
-    private enum IdOperation implements IRegex {
-        DELETE, // DELETE [ID]
-        EDIT,   // EDIT [ID]
-        GET;     // GET [ID]
-
-        @Override
-        public String regex() {
-            return this.name() + "\\s+\"(.+)\"";
-        }
-    }
-
-    private enum StaffOperation implements IRegex {
-        SUBORDINATES,   // SUBORDINATES [ID]
-        SENIORITY,      // SENIORITY [ID]
-        AGE;            // AGE [ID]
-
-        @Override
-        public String regex() {
-            return this.name() + "\\s+\"(.+)\"";
-        }
-    }
-
     private enum Table {
         STAFF, VEHICLE, WEAPON
-    }
-
-    interface TableManager {
-        void handle(String command);
-    }
-
-    interface IPrintHelp {
-        void printHelp();
-    }
-
-    private interface IRegex {
-        String regex();
-    }
-
-    /**
-     * A command line panel.
-     */
-    static class Panel {
-        /**
-         * The panel's title. It precedes all user input.
-         */
-        private String title;
-        /**
-         * The manager that handles user input.
-         */
-        private TableManager manager;
-        /**
-         * All regex sequences the panel recognizes as commands.
-         */
-        private List<String> commands;
-        /**
-         * The panel's help printer.
-         */
-        private IPrintHelp help;
-
-        Panel(String title, String... commands) {
-            this.title = title;
-            ArrayList<String> temp = new ArrayList<>();
-            temp.add(BasicOperation.EXIT.name());
-            temp.addAll(Arrays.asList(commands));
-            this.commands = temp;
-        }
-
-        void setManager(TableManager manager) {
-            this.manager = manager;
-        }
-
-        void setHelp(IPrintHelp help) {
-            this.help = help;
-        }
-
-        void run() {
-            boolean close = false;
-            String userInput;
-            String regex = String.join("|", commands);
-            help.printHelp();
-            do {
-                userInput = ConsoleUtils.getValidString(regex, SCANNER, title);
-                if (userInput.matches(BasicOperation.EXIT.regex())) {
-                    close = true;
-                } else {
-                    manager.handle(userInput);
-                }
-            } while (!close);
-        }
     }
 }
