@@ -1,16 +1,18 @@
 package mx.unam.ciencias.fbd;
 
-import mx.unam.ciencias.fbd.domain.Staff;
 import mx.unam.ciencias.fbd.service.StaffService;
+import mx.unam.ciencias.fbd.service.VehicleService;
+import mx.unam.ciencias.fbd.service.WeaponService;
 
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Scanner;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-/*
- * Main application
- */
+
 public class App {
     /**
      * App's root directory.
@@ -20,22 +22,54 @@ public class App {
      * Logger.
      */
     private final static Logger LOGGER = Logger.getLogger(App.class.getName());
+    private static final StaffService staffService = StaffService.getInstance();
+    private static final VehicleService vehicleService = VehicleService.getInstance();
+    private static final WeaponService weaponService = WeaponService.getInstance();
+    private static final Scanner scan = new Scanner(System.in);
 
-    public static void main(String[] args) {
-        StaffService staffService = StaffService.getInstance();
-        Staff s1 = new Staff("Daniel", Staff.Sex.MALE, LocalDate.now(), LocalDate.now(), Staff.Role.OFFICER);
-        Staff s2 = new Staff("Andrea", Staff.Sex.MALE, LocalDate.now(), LocalDate.now(), Staff.Role.OFFICER);
+    public static void main(String[] args) throws IOException {
+        String tables = Arrays.stream(Table.values()).map(Object::toString).collect(Collectors.joining("|"));
+        boolean close = false;
+        String userInput = "";
+        System.out.println("SSP-CSV-DB @Version alpha0.0.1");
+        usage();
+        do {
+            userInput = scan.next();
+            System.out.printf("Got %s", userInput);
+            if (userInput.equals(BasicOperation.EXIT.toString())) {
+                close = true;
+            }
+        } while (!close);
+    }
 
-        System.out.println("Adding " + s1);
-        staffService.save(s1);
-        staffService.findAll().forEach(System.out::println);
+    private static void usage() {
+        System.out.println("\nUso:");
+        System.out.println("\tUSE [Tabla]");
+        System.out.println("\t  Selecciona la tabla para trabajar sobre ella.");
+        System.out.println("\tEXIT");
+        System.out.println("\t  Termina la ejecución del programa.\n");
+    }
 
-        System.out.println("Adding " + s2);
-        staffService.save(s2);
-        staffService.findAll().forEach(System.out::println);
+    private enum BasicOperation {
+        USE, // USE [Table]
+        EXIT
+    }
 
-        System.out.println("Deleted " + s2);
-        staffService.deleteById(s2.getId());
-        staffService.findAll().forEach(System.out::println);
+    private enum CrudOperation {
+        LIST,   // LIST
+        NEW,    // NEW
+        DELETE, // DELETE [ID]
+        EDIT,   // EDIT [ID]
+        GET     // GET [ID]
+    }
+
+    private enum StaffOperation {
+        SUBORDINATES,   // SUBORDINATES [ID]
+        SENIORITY,      // SENIORITY [ID]
+        AGE            // AGE [ID]
+    }
+
+    private enum Table {
+        STAFF, VEHICLE, WEAPON
     }
 }
